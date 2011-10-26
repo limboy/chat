@@ -1,0 +1,166 @@
+<!doctype html>
+<head>
+    <title>virtual room - {{room}}</title>
+    <style type="text/css">
+        p {padding:0; margin:0}
+        body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
+        .user_status {border:1px solid #ccc; padding:0px; overflow:hidden; margin-bottom:10px}
+        .user_status p {float: left;padding:5px; border-right:1px solid #ccc}
+        .user_list {
+            float:left;
+            color: #666;
+        }
+
+        .user_list span {
+            color: #105CB6;
+            background: #E1F0F7;
+            padding: 0 10px;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            -o-border-radius: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin: 5px 1px 5px 5px;
+            display: inline-block;
+        }
+
+        table {border-collapse: separate; margin-bottom:15px}
+        table th {text-align:left; background: #f4f4f4; padding:5px}
+        table td {padding:5px; border-bottom:1px solid #f4f4f4}
+
+        #post_content input[type="text"] {padding:5px;font-size:14px}
+        #post_content input[type="submit"] {
+            background: #F8F8F9;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8f8f9',endColorstr='#e6e6e8');
+            background: -webkit-gradient(linear,0 0,0 100%,from(#F8F8F9),to(#E6E6E8));
+            background: -moz-linear-gradient(top,#F8F8F9,#E6E6E8);
+            -webkit-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+            -moz-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+            -o-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+            box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+            text-shadow: 0 1px 0 white;
+            border: 1px solid #BBB;
+            color: #666!important;
+            font: normal 14px/22px "Helvetica Neue",Arial,sans-serif;
+            text-decoration: none!important;
+            vertical-align: middle;
+            display: inline-block;
+            text-align: center;
+            padding: 4px 10px;
+            cursor: pointer;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            -o-border-radius: 3px;
+            margin:-4px 0 0 7px;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script>
+        channel = Math.floor(Math.random()*1000000)
+        function create_room_comet() {
+            arg = 'comet=online_users,room_online_users,room_content&channel='+channel+'&room={{room_name}}';
+            $.getJSON('/comet?uri={{uri}}&'+arg, function(data){
+                for (item in data) {
+                    console.log(item)
+                    if (data.hasOwnProperty(item)) {
+                        if (item == 'online_users') {
+                            online_users(data.online_users);
+                        }
+                        else if (item == 'room_online_users') {
+                            room_online_users(data.room_online_users);
+                        }
+                        else if (item == 'type' && data['type'] == 'add_content') {
+                            room_content(data.content);
+                        }
+                    }
+                }
+                create_room_comet()
+            });
+        }
+
+        function online_users(content) {
+            html = ''
+            $.each(content, function(i, val){
+                html += '<span>'+val+'</span> ';
+            });
+            $('#global_online_user .user_list').html(html)
+        }
+
+        function room_online_users(content) {
+            html = ''
+            $.each(content, function(i, val){
+                html += '<span>'+val+'</span>';
+            });
+            $('#room_online_user .user_list').html(html)
+        }
+
+        function room_content(content) {
+            html = '<tr>';
+                html += '<td>'+content.user+'</td>';
+                html += '<td>'+content.content+'</td>';
+                html += '<td>'+content.created+'</td>';
+            html += '</tr>';
+            $('#chat_content table tr:last-child').after(html)
+        }
+
+        $(function(){
+            create_room_comet()
+            $('#post_content').bind('submit', function(evt){
+                evt.preventDefault();
+                data = $(this).serialize()
+                $.post($(this).attr('action'), data, function(result){
+                    //room_content(result)
+                }, 'json')
+            })
+        })
+    </script>
+</head>
+
+<body>
+    <div id="current_user" class="user_status">
+        <p>当前用户</p>
+        <div class="user_list">
+        <span>{{user_name}}</span>
+        </div>
+    </div>
+    <div id="global_online_user" class="user_status">
+        <p>全局在线用户:</p>
+        <div class="user_list">
+        {% for user in online_users %}
+        <span>{{user}}</span>
+        {% endfor %}
+        </div>
+    </div>
+
+    <div id="room_online_user" class="user_status">
+        <p>当前聊天室在线用户:</p>
+        <div class="user_list">
+        {% for user in room_online_users %}
+        <span>{{user}}</span>
+        {% endfor %}
+        </div>
+    </div>
+
+    <div id="chat_content">
+         <table style="width:100%; border:1px solid #ccc; padding:5px">
+            <tr>
+                <th width="20%">user</th>
+                <th>content</th>
+                <th width="20%">time</th>
+            </tr>
+        {% for item in room_content %}
+        <tr>
+            <td>{{item['user']}}</td>
+            <td>{{item['content']}}</td>
+            <td>{{item['created']}}</td>
+        </tr>
+        {% endfor %}
+        </table>
+        <form action="/post_content" method="POST" id="post_content">
+            <input name="content" type="TEXT" />
+            <input type="hidden" name="room_name" value="{{room_name}}" />
+            <input type="SUBMIT" value="发言" />
+        </form>
+    </div>
+</body>
