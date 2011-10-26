@@ -16,6 +16,7 @@ Install
 - cd /path/to/source
 - python bootstrap.py
 - bin/buildout
+- make sure redis-server is started
 - bin/supervisord
 - [optional] bin/supervisorctl
 - goto localhost:9527
