@@ -1,0 +1,51 @@
+p {padding:0; margin:0}
+body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
+.user_status {border:1px solid #ccc; padding:0px; overflow:hidden; margin-bottom:10px}
+.user_status p {float: left;padding:5px; border-right:1px solid #ccc}
+.user_list {
+    float:left;
+    color: #666;
+}
+
+.user_list span {
+    color: #105CB6;
+    background: #E1F0F7;
+    padding: 0 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    margin: 5px 1px 5px 5px;
+    display: inline-block;
+}
+
+table {border-collapse: separate; margin-bottom:15px}
+table th {text-align:left; background: #f4f4f4; padding:5px}
+table td {padding:5px; border-bottom:1px solid #f4f4f4}
+
+#post_content input[type="text"] {padding:5px;font-size:14px}
+#post_content input[type="submit"] {
+    background: #F8F8F9;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8f8f9',endColorstr='#e6e6e8');
+    background: -webkit-gradient(linear,0 0,0 100%,from(#F8F8F9),to(#E6E6E8));
+    background: -moz-linear-gradient(top,#F8F8F9,#E6E6E8);
+    -webkit-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+    -moz-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+    -o-box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+    box-shadow: 0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.1);
+    text-shadow: 0 1px 0 white;
+    border: 1px solid #BBB;
+    color: #666!important;
+    font: normal 14px/22px "Helvetica Neue",Arial,sans-serif;
+    text-decoration: none!important;
+    vertical-align: middle;
+    display: inline-block;
+    text-align: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    margin:-4px 0 0 7px;
+}
