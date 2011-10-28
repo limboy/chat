@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
-    <title>virtual room - {{room}}</title>
+	<meta charset='utf-8' />
+    <title>{{room}} - 谈天说地老天荒</title>
 	<link type="text/css" rel="stylesheet" href="/static/css/main.css" />
 </head>
 
@@ -46,14 +47,18 @@
         </table>
         <form action="/post_content" method="POST" id="post_content">
             <input name="content" type="TEXT" />
-            <input type="hidden" name="room_name" value="{{room_name}}" />
+            <input type="hidden" name="room_id" value="{{room_id}}" />
             <input type="SUBMIT" value="发言" />
         </form>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 	<script>
-		room_name = '{{room_name}}'
+		room_id = '{{room_id}}'
 		uri = '{{uri}}'
 	</script>
 	<script src="/static/script/main.js"></script>
+
+    <script>
+	create_room_comet();
+    </script>
 </body>

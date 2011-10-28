@@ -1,0 +1,46 @@
+<!doctype html>
+<head>
+    <meta charset='utf-8' />
+    <title>谈天说地老天荒 - 聊天室</title>
+    <link type="text/css" rel="stylesheet" href="/static/css/main.css" />
+</head>
+
+<body>
+    <div id="header">
+        <div class="inner">
+            <div id="logo"><a href="/chat">谈天说地老天荒 - 聊天室</a></div>
+            <div class="user_info"> {{nickname}} </div>
+        </div>
+    </div>
+
+    <div id="main">
+        {% for room in rooms %}
+        <div class="box" style="width:260px; float:left" id="room-{{room.id}}">
+            <div class="header"><a href="/chat/{{room.id}}">{{room.title}}</a><span>({{room.users|count}})</span></div>
+            <div class="body">
+                <ul class="chat_line">
+                    {% for content in room.content %}
+                    <li title="{{content.user}} {{content.created}}">{{content.content}}</li>
+                    {% endfor %}
+                </ul>
+                <!--<input type="TEXT" name="content" class="single_input" />-->
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="add_room"> + </div>
+
+    </div>
+    <script>
+        uri = '{{uri}}';
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script src="/static/script/main.js"></script>
+
+    <script>
+        create_chat_comet();
+    </script>
+</body>
+
+

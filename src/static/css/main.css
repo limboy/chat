@@ -1,10 +1,141 @@
 p {padding:0; margin:0}
+body, html {height: 100%; margin:0; padding:0; color:#222}
 body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
+ul, li {padding:0; margin:0; list-style:none}
+
+#header {
+    border-bottom:1px solid #ccc;
+    height: 50px;
+}
+
+#header .inner {
+    width: 960px;
+    margin: 0 auto;
+}
+
+#header .inner #logo {
+    float:left;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 50px;
+}
+
+#header .inner #logo a {
+    text-decoration: none;
+    color: #666;
+}
+
+#header .user_info {
+    float:right;
+    line-height: 50px;
+    color: #666;
+}
+
+#main {
+    width: 960px;
+    margin: 20px auto;
+}
+
+.add_room {
+    border: 1px solid #eee;
+    background: #ffc;
+    padding: 10px 15px;
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    color: #666;
+    font-size: 18px;
+    float: left;
+    margin: 80px 30px;
+    cursor: pointer;
+}
+
+.box {
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    border: 1px solid #eee;
+    margin: 0 55px 55px 0;
+}
+
+.box .header {
+    background: #f8f8f8;
+    padding: 5px;
+    font-size: 14px;
+    border-bottom: 1px solid #ccc;
+}
+
+.box .header a {
+    color: #444;
+    text-decoration: none;
+}
+
+.box .header a:hover {
+    text-decoration: underline;
+}
+
+.box .header span {
+    font-size: 12px;
+    color: #999;
+    padding-left: 3px;
+}
+
+.box .body {
+    height: 160px;
+    position: relative;
+}
+
+.box .body .chat_line {
+}
+
+.box .body .chat_line li {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+    color: #666;
+    height: 21px;
+    overflow: hidden;
+}
+
+.box .body .chat_line li:last-child {
+    border:none;
+}
+
+.box .body .single_input {
+    width: 235px;
+    margin: 7px 5px;
+    position: absolute;
+    bottom: 0;
+}
+
 .user_status {border:1px solid #ccc; padding:0px; overflow:hidden; margin-bottom:10px}
 .user_status p {float: left;padding:5px; border-right:1px solid #ccc}
 .user_list {
     float:left;
     color: #666;
+}
+
+.vh_center {
+    height: 100%; 
+    width: 100%;
+    overflow: visible;
+    position:relative;
+}
+
+.vh_center .inner {
+    position: absolute;
+    top: 50%;
+    margin-top: -30px;
+    left: 50%;
+    margin-left: -100px;
 }
 
 .user_list span {
@@ -24,8 +155,8 @@ table {border-collapse: separate; margin-bottom:15px}
 table th {text-align:left; background: #f4f4f4; padding:5px}
 table td {padding:5px; border-bottom:1px solid #f4f4f4}
 
-#post_content input[type="text"] {padding:5px;font-size:14px}
-#post_content input[type="submit"] {
+input[type="text"] {padding:5px;font-size:14px}
+input[type="submit"] {
     background: #F8F8F9;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8f8f9',endColorstr='#e6e6e8');
     background: -webkit-gradient(linear,0 0,0 100%,from(#F8F8F9),to(#E6E6E8));

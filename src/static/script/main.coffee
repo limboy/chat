@@ -1,16 +1,34 @@
 channel = Math.floor(Math.random()*1000000)
 
+create_chat_comet = ->
+    arg = "comet=room_online_users_count_all,room_content_all&channel=#{channel}"
+    $.getJSON "/comet?uri=#{window.uri}&#{arg}", (result) ->
+        if result.type == 'room_online_users'
+            room_online_users_count_all result.data
+        else if result.type == 'add_content'
+            room_content_all result.data
+        create_chat_comet()
+
 create_room_comet = ->
-	arg = "comet=online_users,room_online_users,room_content&channel=#{channel}&room=#{window.room_name}"
-	$.getJSON "/comet?uri=#{window.uri}&#{arg}", (data) ->
-		for key, val of data
-			if key == 'online_users'
-				online_users data.online_users
-			else if key == 'room_online_users'
-				room_online_users data.room_online_users
-			else if key == 'type' and data.type == 'add_content'
-				room_content data.content
-		create_room_comet()
+    arg = "comet=online_users,room_online_users,room_content&channel=#{channel}&room_id=#{window.room_id}"
+    $.getJSON "/comet?uri=#{window.uri}&#{arg}", (result) ->
+        if result.type == 'online_users'
+            online_users result.data
+        else if result.type == 'room_online_users'
+            room_online_users result.data
+        else if result.type == 'add_content'
+            room_content result.data
+        create_room_comet()
+
+room_online_users_count_all = (content) ->
+    for room_id, users of content
+        $("#room-#{room_id} .header span").text("(#{users.length})")
+
+room_content_all = (content) ->
+    $body = $("#room-#{content.room_id} .body")
+    $body.find('ul').append("<li title='#{content.user} #{content.created}'>#{content.content}</li>")
+    if $body.find('ul li').length > 5
+        $body.find('ul li:first-child').remove()
 
 online_users = (content) ->
 	html = ''
@@ -20,8 +38,9 @@ online_users = (content) ->
 
 room_online_users = (content) ->
 	html = ''
-	for val in content
-		html += "<span>#{val}</span>"
+	for room_id, val of content
+		for item in val
+			html += "<span>#{val}</span>"
 	$('#room_online_user .user_list').html(html)
 
 room_content = (content) ->
@@ -34,7 +53,6 @@ room_content = (content) ->
 	$('#chat_content table tr:last-child').after(html)
 
 $ ->
-	create_room_comet()
 	$('#post_content').bind 'submit', (evt) ->
 		evt.preventDefault()
 		data = $(this).serialize()
@@ -44,3 +62,20 @@ $ ->
 			(result) -> console.log(result)
 			'json'
 		)
+	$('.add_room').bind 'click', (evt) ->
+		title = prompt('要创建的包间名')
+		if title
+			$.post(
+				'/chat',
+				{title: title},
+				(result) ->
+					if result.status == 'ok'
+						window.location.href = result.content.url
+					else
+						msg = ''
+						for key,val of result.content
+							msg += val + '\n'
+						alert msg
+				,
+				'json'
+			)
