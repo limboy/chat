@@ -20,8 +20,8 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    nickname = request.form.get('nickname', '')
-    session['user'] = nickname
+    user_name = request.form.get('user_name', '')
+    session['user'] = user_name
     return redirect('/chat')
 
 @app.route('/chat', methods=['GET', 'POST'])
@@ -55,7 +55,6 @@ def chat():
             })
 
     return render_template('chat.html',
-            nickname = session['user'],
             rooms = rooms,
             uri = request.path,
             )
@@ -76,14 +75,10 @@ def chat_room(room_id):
     rc.publish(config.ONLINE_USER_SIGNAL, '')
     rc.publish(room_online_user_signal, json.dumps({'room_id':room_id}))
 
-    room_content = rc.zrange(config.ROOM_CHANNEL.format(room=room_id), 0, -1, withscores=True)
+    room_content = reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_id), 0, 4, withscores=True))
     room_content_list = []
     for item in room_content:
         room_content_list.append(json.loads(item[0]))
-
-    online_users = []
-    for user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
-        online_users.append(user.decode('utf-8'))
 
     room_online_users =[]
     for user in rc.zrange(room_online_user_channel, 0, -1):
@@ -91,11 +86,9 @@ def chat_room(room_id):
 
     return render_template('room.html',
             room_content = room_content_list,
-            online_users = online_users,
             uri = request.path,
             room_name = room['title'],
             room_id = room_id,
-            user_name = user_name,
             room_online_users = room_online_users)
 
 @app.route('/post_content', methods=['POST'])

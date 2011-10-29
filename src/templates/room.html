@@ -1,25 +1,10 @@
-<!doctype html>
-<head>
-	<meta charset='utf-8' />
-    <title>{{room}} - 谈天说地老天荒</title>
-	<link type="text/css" rel="stylesheet" href="/static/css/main.css" />
-</head>
+{% extends 'layout.html' %}
 
-<body>
-    <div id="current_user" class="user_status">
-        <p>当前用户</p>
-        <div class="user_list">
-        <span>{{user_name}}</span>
-        </div>
-    </div>
-    <div id="global_online_user" class="user_status">
-        <p>全局在线用户:</p>
-        <div class="user_list">
-        {% for user in online_users %}
-        <span>{{user}}</span>
-        {% endfor %}
-        </div>
-    </div>
+{% block title %}
+{{room_name}} - {{config['CHAT_NAME']}}
+{% endblock %}
+
+{% block main %}
 
     <div id="room_online_user" class="user_status">
         <p>当前聊天室在线用户:</p>
@@ -32,33 +17,34 @@
 
     <div id="chat_content">
          <table style="width:100%; border:1px solid #ccc; padding:5px">
+			<thead>
             <tr>
-                <th width="20%">user</th>
+                <th>user</th>
                 <th>content</th>
-                <th width="20%">time</th>
+                <th>time</th>
             </tr>
-        {% for item in room_content %}
-        <tr>
-            <td>{{item['user']}}</td>
-            <td>{{item['content']}}</td>
-            <td>{{item['created']}}</td>
-        </tr>
-        {% endfor %}
-        </table>
-        <form action="/post_content" method="POST" id="post_content">
-            <input name="content" type="TEXT" />
-            <input type="hidden" name="room_id" value="{{room_id}}" />
-            <input type="SUBMIT" value="发言" />
-        </form>
-    </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-	<script>
-		room_id = '{{room_id}}'
-		uri = '{{uri}}'
-	</script>
-	<script src="/static/script/main.js"></script>
+			</thead>
 
-    <script>
-	create_room_comet();
-    </script>
-</body>
+			<tbody>
+			{% for item in room_content %}
+			<tr>
+				<td>{{item['user']}}</td>
+				<td>{{item['content']}}</td>
+				<td>{{item['created']}}</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+        </table>
+    </div>
+	<form action="/post_content" method="POST" id="post_content">
+		<input name="content" type="TEXT" />
+		<input type="hidden" name="room_id" value="{{room_id}}" />
+		<input type="SUBMIT" value="发言" />
+	</form>
+{% endblock %}
+
+{% block script %}
+	<script> room_id = '{{room_id}}'; uri = '{{uri}}' </script>
+	<script src="/static/script/main.js"></script>
+    <script> create_room_comet(); </script>
+{% endblock %}

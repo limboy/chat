@@ -151,6 +151,30 @@ ul, li {padding:0; margin:0; list-style:none}
     display: inline-block;
 }
 
+#chat_content table thead tr {
+    display: block;
+    position: relative;
+}
+
+#chat_content table thead th, #chat_content table tbody td {
+    width: 155px;
+}
+
+#chat_content table thead th + th, #chat_content table tbody td + td {
+    width: 600px;
+}
+
+#chat_content table thead th + th + th, #chat_content table tbody td + td + td {
+    width: 150px;
+}
+
+#chat_content table tbody{
+    max-height: 100px;
+    overflow: auto;
+    width: 100%;
+    display: block
+}
+
 table {border-collapse: separate; margin-bottom:15px}
 table th {text-align:left; background: #f4f4f4; padding:5px}
 table td {padding:5px; border-bottom:1px solid #f4f4f4}

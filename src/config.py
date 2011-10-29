@@ -1,8 +1,10 @@
+#coding=utf-8
+
 DEBUG = True
 PORT = 9527
 SECRET_KEY = 'i have a dream'
 
-
+CHAT_NAME = u'谈天说地老天荒'
 
 ONLINE_USER_CHANNEL = 'online_user_channel'
 ROOM_ONLINE_USER_CHANNEL = 'room_online_user_channel_{room}'
