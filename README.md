@@ -8,7 +8,7 @@ Basic Architecture
 Screenshot
 ==========
 
-![architecture](http://blog.leezhong.com/image/comet_chat.png)
+![chat](http://blog.leezhong.com/image/comet_chat.png)
 
 Install
 =======
@@ -32,7 +32,10 @@ Changes
 0.1
 ---
 
-* login (custom nickname)
-* adjust style
+* add home page (all rooms in one page, and live content)
+* custom nickname
 * create room
 * coffee-script
+
+![home](http://blog.leezhong.com/image/comet_home_0.1.png)
+![room](http://blog.leezhong.com/image/comet_room_0.1.gif)
