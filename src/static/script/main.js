@@ -90,7 +90,8 @@ $(function() {
     data = $(this).serialize();
     return $.post($(this).attr('action'), data, function(result) {
       $('#post_content input[name="content"]').val('');
-      return window.entering_content = true;
+      window.entering_content = true;
+      return document.title = document.title.replace(/\([0-9]+\) /, '');
     }, 'json');
   });
   $('#post_content input[name="content"]').bind('click', function(evt) {

@@ -74,6 +74,7 @@ $ ->
             (result) ->
                 $('#post_content input[name="content"]').val('')
                 window.entering_content = true
+                document.title = document.title.replace(/\([0-9]+\) /, '')
             'json'
         )
 

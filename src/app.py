@@ -26,6 +26,11 @@ def is_duplicate_name():
 def index():
     return render_template('index.html')
 
+@app.route('/change_name')
+def change_name():
+    session.pop('user', None)
+    return redirect('/')
+
 @app.route('/login', methods=['POST'])
 def login():
     user_name = request.form.get('user_name', '')
