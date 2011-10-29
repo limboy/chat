@@ -31,7 +31,7 @@ room_online_users_count_all = function(content) {
   _results = [];
   for (room_id in content) {
     users = content[room_id];
-    _results.push($("#room-" + room_id + " .header span").text("(" + users.length + ")"));
+    _results.push($("#room-" + room_id + " .header span").text("(" + users.length + "人在线)"));
   }
   return _results;
 };

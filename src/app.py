@@ -14,6 +14,14 @@ app.debug = True
 
 rc = redis.Redis()
 
+def is_duplicate_name():
+    user_name = session.get('user', '')
+    for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
+        if online_user == user_name:
+            flash(u'该名(%s)已被抢占，换一个吧'%user_name, 'error')
+            return True
+    return False
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -21,10 +29,8 @@ def index():
 @app.route('/login', methods=['POST'])
 def login():
     user_name = request.form.get('user_name', '')
-    for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
-        if online_user == user_name:
-            flash(u'该名已被抢占，换一个吧', 'error')
-            return redirect('/')
+    if is_duplicate_name():
+        return redirect('/')
     session['user'] = user_name
     return redirect('/chat')
 
