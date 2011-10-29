@@ -1,19 +1,23 @@
 <!doctype html>
+<html style="height:100%">
 <head>
-    <title>virtual room - {{room}}</title>
-    <style>
-        p {padding:0; margin:0}
-        body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
-        p.tip {color:#999}
-        h1 {font-size:18px}
-    </style>
+	<meta charset='utf-8' />
+    <title>{{config['CHAT_NAME']}}</title>
+	<link href="/static/css/main.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
-<h1>默认聊天室</h1>
-<ul>
-    <li><a href="/chat/foo">/chat/foo</a></li>
-    <li><a href="/chat/bar">/chat/bar</a></li>
-</ul>
-<p class="tip">小提示：可以修改url来自定义聊天室</p>
+<body style="height:100%">
+	<div class="vh_center">
+		<div class="inner">
+            <div class="message">
+                {% for cate, message in get_flashed_messages(with_categories=true) %}
+                <p class="{{cate}}">{{message}}</p>
+                {% endfor %}
+            </div>
+            <form method="POST" action="/login">
+                <input type="TEXT" name="user_name" placeholder="选个酷一点的名字" />
+                <input type="SUBMIT" value="进入" />
+            </form>
+		</div>
+	</div>
 </body>

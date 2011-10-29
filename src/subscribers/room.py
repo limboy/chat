@@ -13,9 +13,9 @@ ps.psubscribe(config.ROOM_SIGNAL.format(room='*'))
 
 def run():
     for item in ps.listen():
-        print item
         data = json.loads(item['data'])
-        rc.set(config.ROOM_KEY.format(room=data['content']['room']), json.dumps(data))
+        print data
+        rc.set(config.ROOM_KEY.format(room=data['data']['room_id']), json.dumps(data))
 
 if __name__ == '__main__':
     run()

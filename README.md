@@ -24,5 +24,15 @@ Install
 Tips
 ====
 
-- users are created automaticly after entering room (user\_1 / user\_2 ...)
 - open multi browser to test live communication
+
+Changes
+=======
+
+0.1
+---
+
+* login (custom nickname)
+* adjust style
+* create room
+* coffee-script

@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{config['CHAT_NAME']}}
+{% endblock %}
+
+{% block main %}
+{% for room in rooms %}
+<div class="box" style="width:260px; float:left" id="room-{{room.id}}">
+    <div class="header"><a href="/chat/{{room.id}}">{{room.title}}</a><span>({{room.users|count}}人在线)</span></div>
+    <div class="body">
+        <ul class="chat_line">
+            {% for content in room.content %}
+            <li title="{{content.user}} {{content.created}}">{{content.content}}</li>
+            {% endfor %}
+        </ul>
+        <!--<input type="TEXT" name="content" class="single_input" />-->
+    </div>
+</div>
+{% endfor %}
+<div class="add_room"> + </div>
+{% endblock %}
+
+{% block script %}
+<script> uri = '{{uri}}'; </script>
+<script src="/static/script/main.js"></script>
+<script> create_chat_comet(); </script>
+{% endblock %}
