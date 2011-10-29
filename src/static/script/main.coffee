@@ -71,7 +71,9 @@ $ ->
         $.post(
             $(this).attr('action')
             data
-            (result) -> $('#post_content input[name="content"]').val('')
+            (result) ->
+                $('#post_content input[name="content"]').val('')
+                window.entering_content = true
             'json'
         )
 

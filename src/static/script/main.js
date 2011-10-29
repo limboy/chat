@@ -89,7 +89,8 @@ $(function() {
     evt.preventDefault();
     data = $(this).serialize();
     return $.post($(this).attr('action'), data, function(result) {
-      return $('#post_content input[name="content"]').val('');
+      $('#post_content input[name="content"]').val('');
+      return window.entering_content = true;
     }, 'json');
   });
   $('#post_content input[name="content"]').bind('click', function(evt) {
