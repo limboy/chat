@@ -3,6 +3,8 @@ body, html {height: 100%; margin:0; padding:0; color:#222}
 body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
 ul, li {padding:0; margin:0; list-style:none}
 
+.error {color: red}
+
 #header {
     border-bottom:1px solid #ccc;
     height: 50px;

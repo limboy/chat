@@ -22,7 +22,7 @@ create_room_comet = ->
 
 room_online_users_count_all = (content) ->
     for room_id, users of content
-        $("#room-#{room_id} .header span").text("(#{users.length})")
+        $("#room-#{room_id} .header span").text("(#{users.length}人在线)")
 
 room_content_all = (content) ->
     $body = $("#room-#{content.room_id} .body")

@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from flask import Flask, request, session, render_template, Response, jsonify, redirect
+from flask import Flask, request, session, render_template, Response, jsonify, redirect, flash
 from gevent.wsgi import WSGIServer
 import gevent
 import redis
@@ -21,6 +21,10 @@ def index():
 @app.route('/login', methods=['POST'])
 def login():
     user_name = request.form.get('user_name', '')
+    for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
+        if online_user == user_name:
+            flash(u'该名已被抢占，换一个吧', 'error')
+            return redirect('/')
     session['user'] = user_name
     return redirect('/chat')
 
@@ -158,7 +162,6 @@ def comet():
 
     if 'room_online_users_count_all' in comet:
         room_online_user_keys = config.ROOM_ONLINE_USER_KEY.format(room='*')
-        app.logger.info(room_online_user_keys)
         for user_key in rc.keys(room_online_user_keys):
             if user_key not in rc.hgetall(channel):
                 rc.hset(channel, user_key, rc.get(user_key))

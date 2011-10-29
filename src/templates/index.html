@@ -1,17 +1,22 @@
 <!doctype html>
 <head>
 	<meta charset='utf-8' />
-    <title>谈天说地老天荒 - 聊天室</title>
+    <title>{{config['CHAT_NAME']}}</title>
 	<link href="/static/css/main.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
 	<div class="vh_center">
 		<div class="inner">
-		<form method="POST" action="/login">
-			<input type="TEXT" name="user_name" placeholder="选个酷一点的名字" />
-			<input type="SUBMIT" value="进入" />
-		</form>
+            <div class="message">
+                {% for cate, message in get_flashed_messages(with_categories=true) %}
+                <p class="{{cate}}">{{message}}</p>
+                {% endfor %}
+            </div>
+            <form method="POST" action="/login">
+                <input type="TEXT" name="user_name" placeholder="选个酷一点的名字" />
+                <input type="SUBMIT" value="进入" />
+            </form>
 		</div>
 	</div>
 </body>
