@@ -33,8 +33,6 @@ Changes
 ---
 
 * login (custom nickname)
-* sqlite as storage engine
-* optimize code
 * adjust style
 * create room
 * coffee-script
