@@ -5,6 +5,8 @@ ul, li {padding:0; margin:0; list-style:none}
 
 .error {color: red}
 
+li.new {background: #ffe}
+
 #header {
     border-bottom:1px solid #ccc;
     height: 50px;
@@ -171,10 +173,14 @@ ul, li {padding:0; margin:0; list-style:none}
 }
 
 #chat_content table tbody{
-    max-height: 100px;
+    max-height: 400px;
     overflow: auto;
     width: 100%;
     display: block
+}
+
+#chat_content table tbody td + td + td {
+    color: #999;
 }
 
 table {border-collapse: separate; margin-bottom:15px}

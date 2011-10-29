@@ -38,7 +38,7 @@ room_online_users_count_all = function(content) {
 room_content_all = function(content) {
   var $body;
   $body = $("#room-" + content.room_id + " .body");
-  $body.find('ul').append("<li title='" + content.user + " " + content.created + "'>" + content.content + "</li>");
+  $body.find('ul').append("<li class='new' title='" + content.user + " " + content.created + "'>" + content.content + "</li>");
   if ($body.find('ul li').length > 5) {
     return $body.find('ul li:first-child').remove();
   }
@@ -66,16 +66,20 @@ room_online_users = function(content) {
 };
 room_content = function(content) {
   var html;
-  html = "<tr>			<td>" + content.user + "</td>			<td>" + content.content + "</td>			<td>" + content.created + "</td>			</tr>		";
-  return $('#chat_content table tr:last-child').after(html);
+  html = "<tr>            <td>" + content.user + "</td>            <td>" + content.content + "</td>            <td>" + content.created + "</td>            </tr>        ";
+  $('#chat_content table tbody').append(html);
+  return $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
 };
 $(function() {
+  if ($('#chat_content tbody tr').length) {
+    $('#chat_content tbody tr:last-child').get(0).scrollIntoView();
+  }
   $('#post_content').bind('submit', function(evt) {
     var data;
     evt.preventDefault();
     data = $(this).serialize();
     return $.post($(this).attr('action'), data, function(result) {
-      return console.log(result);
+      return $('#post_content input[name="content"]').val('');
     }, 'json');
   });
   return $('.add_room').bind('click', function(evt) {

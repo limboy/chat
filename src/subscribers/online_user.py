@@ -13,9 +13,7 @@ ps.subscribe(config.ONLINE_USER_SIGNAL)
 
 def run():
     for item in ps.listen():
-        print item
         online_users = rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1)
-        print online_users
         rc.set(config.ONLINE_USER_KEY, json.dumps({
             "data": online_users,
             'type': 'online_users',

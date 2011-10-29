@@ -26,56 +26,60 @@ room_online_users_count_all = (content) ->
 
 room_content_all = (content) ->
     $body = $("#room-#{content.room_id} .body")
-    $body.find('ul').append("<li title='#{content.user} #{content.created}'>#{content.content}</li>")
+    $body.find('ul').append("<li class='new' title='#{content.user} #{content.created}'>#{content.content}</li>")
     if $body.find('ul li').length > 5
         $body.find('ul li:first-child').remove()
 
 online_users = (content) ->
-	html = ''
-	for val in content
-		html += "<span>#{val}</span>"
-	$('#global_online_user .user_list').html(html)
+    html = ''
+    for val in content
+        html += "<span>#{val}</span>"
+    $('#global_online_user .user_list').html(html)
 
 room_online_users = (content) ->
-	html = ''
-	for room_id, val of content
-		for item in val
-			html += "<span>#{val}</span>"
-	$('#room_online_user .user_list').html(html)
+    html = ''
+    for room_id, val of content
+        for item in val
+            html += "<span>#{val}</span>"
+    $('#room_online_user .user_list').html(html)
 
 room_content = (content) ->
-	html = "<tr>
-			<td>#{content.user}</td>
-			<td>#{content.content}</td>
-			<td>#{content.created}</td>
-			</tr>
-		"
-	$('#chat_content table tr:last-child').after(html)
+    html = "<tr>
+            <td>#{content.user}</td>
+            <td>#{content.content}</td>
+            <td>#{content.created}</td>
+            </tr>
+        "
+    $('#chat_content table tbody').append(html)
+    $("#chat_content table tbody tr:last-child").get(0).scrollIntoView()
 
 $ ->
-	$('#post_content').bind 'submit', (evt) ->
-		evt.preventDefault()
-		data = $(this).serialize()
-		$.post(
-			$(this).attr('action')
-			data
-			(result) -> console.log(result)
-			'json'
-		)
-	$('.add_room').bind 'click', (evt) ->
-		title = prompt('要创建的包间名')
-		if title
-			$.post(
-				'/chat',
-				{title: title},
-				(result) ->
-					if result.status == 'ok'
-						window.location.href = result.content.url
-					else
-						msg = ''
-						for key,val of result.content
-							msg += val + '\n'
-						alert msg
-				,
-				'json'
-			)
+    if $('#chat_content tbody tr').length
+        $('#chat_content tbody tr:last-child').get(0).scrollIntoView()
+
+    $('#post_content').bind 'submit', (evt) ->
+        evt.preventDefault()
+        data = $(this).serialize()
+        $.post(
+            $(this).attr('action')
+            data
+            (result) -> $('#post_content input[name="content"]').val('')
+            'json'
+        )
+    $('.add_room').bind 'click', (evt) ->
+        title = prompt('要创建的包间名')
+        if title
+            $.post(
+                '/chat',
+                {title: title},
+                (result) ->
+                    if result.status == 'ok'
+                        window.location.href = result.content.url
+                    else
+                        msg = ''
+                        for key,val of result.content
+                            msg += val + '\n'
+                        alert msg
+                ,
+                'json'
+            )

@@ -85,7 +85,7 @@ def chat_room(room_id):
     rc.publish(config.ONLINE_USER_SIGNAL, '')
     rc.publish(room_online_user_signal, json.dumps({'room_id':room_id}))
 
-    room_content = reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_id), 0, 4, withscores=True))
+    room_content = reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_id), 0, 200, withscores=True))
     room_content_list = []
     for item in room_content:
         room_content_list.append(json.loads(item[0]))
@@ -106,7 +106,7 @@ def post_content():
     room_id = request.form.get('room_id')
     data = {'user': session.get('user'),
             'content': request.form.get('content', ''),
-            'created': time.strftime('%H:%M:%S'),
+            'created': time.strftime('%m-%d %H:%M:%S'),
             'room_id': room_id,
             }
     rc.zadd(config.ROOM_CHANNEL.format(room=room_id), json.dumps(data), time.time())
