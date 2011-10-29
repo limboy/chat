@@ -1,5 +1,5 @@
 p {padding:0; margin:0}
-body, html {height: 100%; margin:0; padding:0; color:#222}
+body, html {margin:0; padding:0; color:#222}
 body {font:13px/22px 'Helvetica Neue',Helvetica,Arial,Sans-serif}
 ul, li {padding:0; margin:0; list-style:none}
 
@@ -38,6 +38,7 @@ li.new {background: #ffe}
 #main {
     width: 960px;
     margin: 20px auto;
+    overflow: hidden;
 }
 
 .add_room {
@@ -120,7 +121,11 @@ li.new {background: #ffe}
     bottom: 0;
 }
 
-.user_status {border:1px solid #ccc; padding:0px; overflow:hidden; margin-bottom:10px}
+#post_content {
+    margin-left:-2px;
+}
+
+.user_status {border:1px solid #ccc; padding:0px; overflow:hidden; margin:5px 0 10px 0}
 .user_status p {float: left;padding:5px; border-right:1px solid #ccc}
 .user_list {
     float:left;

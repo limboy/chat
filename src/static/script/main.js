@@ -59,16 +59,26 @@ room_online_users = function(content) {
     val = content[room_id];
     for (_i = 0, _len = val.length; _i < _len; _i++) {
       item = val[_i];
-      html += "<span>" + val + "</span>";
+      html += "<span>" + item + "</span>";
     }
   }
   return $('#room_online_user .user_list').html(html);
 };
 room_content = function(content) {
-  var html;
+  var current_count, current_title, html, new_count;
   html = "<tr>            <td>" + content.user + "</td>            <td>" + content.content + "</td>            <td>" + content.created + "</td>            </tr>        ";
   $('#chat_content table tbody').append(html);
-  return $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
+  $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
+  if (!window.entering_content) {
+    if (document.title.substr(0, 1) !== '(') {
+      return document.title = "(1) " + document.title;
+    } else {
+      current_title = document.title;
+      current_count = parseInt(current_title.slice(current_title.indexOf('(') + 1, current_title.indexOf(')')));
+      new_count = current_count + 1;
+      return document.title = current_title.replace("(" + current_count + ")", "(" + new_count + ")");
+    }
+  }
 };
 $(function() {
   if ($('#chat_content tbody tr').length) {
@@ -81,6 +91,13 @@ $(function() {
     return $.post($(this).attr('action'), data, function(result) {
       return $('#post_content input[name="content"]').val('');
     }, 'json');
+  });
+  $('#post_content input[name="content"]').bind('click', function(evt) {
+    window.entering_content = true;
+    return document.title = document.title.replace(/\([0-9]+\) /, '');
+  });
+  $('#post_content input[name="content"]').bind('blur', function(evt) {
+    return window.entering_content = false;
   });
   return $('.add_room').bind('click', function(evt) {
     var title;

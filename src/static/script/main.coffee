@@ -40,7 +40,7 @@ room_online_users = (content) ->
     html = ''
     for room_id, val of content
         for item in val
-            html += "<span>#{val}</span>"
+            html += "<span>#{item}</span>"
     $('#room_online_user .user_list').html(html)
 
 room_content = (content) ->
@@ -52,6 +52,14 @@ room_content = (content) ->
         "
     $('#chat_content table tbody').append(html)
     $("#chat_content table tbody tr:last-child").get(0).scrollIntoView()
+    if not window.entering_content
+        if document.title.substr(0, 1) != '('
+            document.title = "(1) #{document.title}"
+        else
+            current_title = document.title
+            current_count = parseInt(current_title.slice(current_title.indexOf('(')+1, current_title.indexOf(')')))
+            new_count = current_count + 1
+            document.title = current_title.replace("(#{current_count})", "(#{new_count})")
 
 $ ->
     if $('#chat_content tbody tr').length
@@ -66,6 +74,14 @@ $ ->
             (result) -> $('#post_content input[name="content"]').val('')
             'json'
         )
+
+    $('#post_content input[name="content"]').bind 'click', (evt) ->
+        window.entering_content = true
+        document.title = document.title.replace(/\([0-9]+\) /, '')
+
+    $('#post_content input[name="content"]').bind 'blur', (evt) ->
+        window.entering_content = false
+
     $('.add_room').bind 'click', (evt) ->
         title = prompt('要创建的包间名')
         if title
