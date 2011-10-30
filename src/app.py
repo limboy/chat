@@ -59,7 +59,7 @@ def chat():
                     'user': session['user'],
                     'created': time.time()
                     }))
-        return jsonify(status='ok', content={'url': '/chat'})
+        return redirect('/chat')
 
     rooms = []
     room_info_keys = config.ROOM_INFO_KEY.format(room='*')

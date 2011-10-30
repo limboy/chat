@@ -92,19 +92,4 @@ $ ->
         window.entering_content = false
 
     $('.add_room').bind 'click', (evt) ->
-        title = prompt('要创建的包间名')
-        if title
-            $.post(
-                '/chat',
-                {title: title},
-                (result) ->
-                    if result.status == 'ok'
-                        window.location.href = result.content.url
-                    else
-                        msg = ''
-                        for key,val of result.content
-                            msg += val + '\n'
-                        alert msg
-                ,
-                'json'
-            )
+        $('.chat-bubble').toggle()

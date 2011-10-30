@@ -109,25 +109,6 @@ $(function() {
     return window.entering_content = false;
   });
   return $('.add_room').bind('click', function(evt) {
-    var title;
-    title = prompt('要创建的包间名');
-    if (title) {
-      return $.post('/chat', {
-        title: title
-      }, function(result) {
-        var key, msg, val, _ref;
-        if (result.status === 'ok') {
-          return window.location.href = result.content.url;
-        } else {
-          msg = '';
-          _ref = result.content;
-          for (key in _ref) {
-            val = _ref[key];
-            msg += val + '\n';
-          }
-          return alert(msg);
-        }
-      }, 'json');
-    }
+    return $('.chat-bubble').toggle();
   });
 });
