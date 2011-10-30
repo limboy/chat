@@ -25,9 +25,18 @@ Tips
 ====
 
 - open multi browser to test live communication
+- execute `bin/python scripts/clear_key.py` to clear all data
 
 Changes
 =======
+
+0.1.1
+-----
+
+* adjust create room UI / UE
+* add rm room func
+* improve add chat message's response speed
+* bugfixes
 
 0.1
 ---
@@ -36,6 +45,7 @@ Changes
 * custom nickname
 * create room
 * coffee-script
+* bugfixes
 
 ![home](http://blog.leezhong.com/image/comet_home_0.1.png)
 ![room](http://blog.leezhong.com/image/comet_room_0.1.gif)
