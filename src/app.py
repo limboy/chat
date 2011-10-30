@@ -2,6 +2,7 @@
 
 from flask import Flask, request, session, render_template, Response, jsonify, redirect, flash
 from gevent.wsgi import WSGIServer
+from utils.text import linkify, escape_text
 import gevent
 import redis
 import time
@@ -24,6 +25,8 @@ def is_duplicate_name():
 
 @app.route('/')
 def index():
+    if session.get('user'):
+        return redirect('/chat')
     return render_template('index.html')
 
 @app.route('/change_name')
@@ -36,7 +39,7 @@ def login():
     user_name = request.form.get('user_name', '')
     if is_duplicate_name():
         return redirect('/')
-    session['user'] = user_name
+    session['user'] = escape_text(user_name)
     return redirect('/chat')
 
 @app.route('/chat', methods=['GET', 'POST'])
@@ -110,7 +113,7 @@ def chat_room(room_id):
 def post_content():
     room_id = request.form.get('room_id')
     data = {'user': session.get('user'),
-            'content': request.form.get('content', ''),
+            'content': linkify(escape_text(request.form.get('content', ''))),
             'created': time.strftime('%m-%d %H:%M:%S'),
             'room_id': room_id,
             }
