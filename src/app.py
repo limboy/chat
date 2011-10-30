@@ -23,6 +23,31 @@ def is_duplicate_name():
             return True
     return False
 
+class Comet(object):
+    def _single(self, config_key, channel):
+        if config_key not in rc.hgetall(channel):
+            rc.hset(channel, config_key, rc.get(config_key))
+        channel_val = rc.hget(channel, config_key)
+        key_val = rc.get(config_key)
+
+        if channel_val != key_val:
+            rc.hset(channel, config_key, key_val)
+            if key_val:
+                return json.loads(key_val)
+
+    def online_users(self, channel):
+        return self._single(config.ONLINE_USER_KEY, channel)
+
+    def room_online_users(self, channel, room_id = 0, key = None):
+        if not key:
+            key = config.ROOM_ONLINE_USER_KEY.format(room=room_id)
+        return self._single(key, channel)
+
+    def room_content(self, channel, room_id = 0, key = None):
+        if not key:
+            key = config.ROOM_KEY.format(room=room_id)
+        return self._single(key, channel)
+
 @app.route('/')
 def index():
     if session.get('user'):
@@ -154,72 +179,36 @@ def comet():
         rc.zadd(room_online_user_channel, session['user'], time.time())
     rc.zadd(config.ONLINE_USER_CHANNEL, session['user'], time.time())
 
-    if 'online_users' in comet:
-        if config.ONLINE_USER_KEY not in rc.hgetall(channel):
-            rc.hset(channel, config.ONLINE_USER_KEY, rc.get(config.ONLINE_USER_KEY))
-        channel_val = rc.hget(channel, config.ONLINE_USER_KEY)
-        key_val = rc.get(config.ONLINE_USER_KEY)
+    cmt = Comet()
 
-        if channel_val != key_val:
-            rc.hset(channel, config.ONLINE_USER_KEY, key_val)
-            if key_val:
-                return jsonify(json.loads(key_val))
+    if 'online_users' in comet:
+        result = cmt.online_users(channel)
+        if result:
+            return jsonify(result)
 
     if 'room_online_users' in comet:
-        room_online_user_key = config.ROOM_ONLINE_USER_KEY.format(room=room_id)
-        if room_online_user_key not in rc.hgetall(channel):
-            rc.hset(channel, room_online_user_key, rc.get(room_online_user_key))
-
-        channel_val = rc.hget(channel, room_online_user_key)
-        key_val = rc.get(room_online_user_key)
-
-        if channel_val != key_val:
-            rc.hset(channel, room_online_user_key, key_val)
-            if key_val:
-                return jsonify(json.loads(key_val))
+        result = cmt.room_online_users(channel, room_id)
+        if result:
+            return jsonify(result)
 
     if 'room_content' in comet:
-        room_key = config.ROOM_KEY.format(room=room_id)
-        if room_key not in rc.hgetall(channel):
-            rc.hset(channel, room_key, rc.get(room_key))
-
-        channel_val = rc.hget(channel, room_key)
-        key_val = rc.get(room_key)
-
-        if channel_val != key_val:
-            rc.hset(channel, room_key, key_val)
-            if key_val:
-                return jsonify(json.loads(key_val))
+        result = cmt.room_content(channel, room_id)
+        if result:
+            return jsonify(result)
 
     if 'room_online_users_count_all' in comet:
         room_online_user_keys = config.ROOM_ONLINE_USER_KEY.format(room='*')
         for user_key in rc.keys(room_online_user_keys):
-            if user_key not in rc.hgetall(channel):
-                rc.hset(channel, user_key, rc.get(user_key))
-
-            channel_val = rc.hget(channel, user_key)
-            key_val = rc.get(user_key)
-
-            if channel_val != key_val:
-                rc.hset(channel, user_key, key_val)
-                if key_val:
-                    return jsonify(json.loads(key_val))
+            result = cmt.room_online_users(channel, key = user_key)
+            if result:
+                return jsonify(result)
 
     if 'room_content_all' in comet:
-        max_room_id = rc.get(config.ROOM_INCR_KEY)
-        if max_room_id:
-            room_keys = [config.ROOM_KEY.format(room=tmp_room_id) for tmp_room_id in range(1, int(max_room_id)+1)]
-            for room_key in room_keys:
-                if room_key not in rc.hgetall(channel):
-                    rc.hset(channel, room_key, rc.get(room_key))
-
-                channel_val = rc.hget(channel, room_key)
-                key_val = rc.get(room_key)
-
-                if channel_val != key_val:
-                    rc.hset(channel, room_key, key_val)
-                    if key_val:
-                        return jsonify(json.loads(key_val))
+        room_keys = config.ROOM_KEY.format(room='*')
+        for room_key in rc.keys(room_keys):
+            result = cmt.room_content(channel, key = room_key)
+            if result:
+                return jsonify(result)
 
     passed_time = 0
     while passed_time < config.COMET_TIMEOUT:
