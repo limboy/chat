@@ -116,6 +116,7 @@ def post_content():
             'content': linkify(escape_text(request.form.get('content', ''))),
             'created': time.strftime('%m-%d %H:%M:%S'),
             'room_id': room_id,
+            'id': rc.incr(config.ROOM_CONTENT_INCR_KEY),
             }
     rc.zadd(config.ROOM_CHANNEL.format(room=room_id), json.dumps(data), time.time())
     rc.publish(config.ROOM_SIGNAL.format(room=room_id), json.dumps({

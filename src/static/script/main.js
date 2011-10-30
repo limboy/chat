@@ -65,18 +65,21 @@ room_online_users = function(content) {
   return $('#room_online_user .user_list').html(html);
 };
 room_content = function(content) {
-  var current_count, current_title, html, new_count;
-  html = "<tr>            <td>" + content.user + "</td>            <td>" + content.content + "</td>            <td>" + content.created + "</td>            </tr>        ";
-  $('#chat_content table tbody').append(html);
-  $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
-  if (!window.entering_content) {
-    if (document.title.substr(0, 1) !== '(') {
-      return document.title = "(1) " + document.title;
-    } else {
-      current_title = document.title;
-      current_count = parseInt(current_title.slice(current_title.indexOf('(') + 1, current_title.indexOf(')')));
-      new_count = current_count + 1;
-      return document.title = current_title.replace("(" + current_count + ")", "(" + new_count + ")");
+  var $msg, current_count, current_title, html, new_count;
+  $msg = $("#msg-" + content.id);
+  if (!$msg.length) {
+    html = "<tr id='msg-" + content.id + "'>                <td>" + content.user + "</td>                <td>" + content.content + "</td>                <td>" + content.created + "</td>                </tr>            ";
+    $('#chat_content table tbody').append(html);
+    $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
+    if (!window.entering_content) {
+      if (document.title.substr(0, 1) !== '(') {
+        return document.title = "(1) " + document.title;
+      } else {
+        current_title = document.title;
+        current_count = parseInt(current_title.slice(current_title.indexOf('(') + 1, current_title.indexOf(')')));
+        new_count = current_count + 1;
+        return document.title = current_title.replace("(" + current_count + ")", "(" + new_count + ")");
+      }
     }
   }
 };
@@ -88,10 +91,14 @@ $(function() {
     var data;
     evt.preventDefault();
     data = $(this).serialize();
+    if ($.trim($(this).find('input[name="content"]').val()) === '') {
+      return false;
+    }
     return $.post($(this).attr('action'), data, function(result) {
       $('#post_content input[name="content"]').val('');
       window.entering_content = true;
-      return document.title = document.title.replace(/\([0-9]+\) /, '');
+      document.title = document.title.replace(/\([0-9]+\) /, '');
+      return room_content(result);
     }, 'json');
   });
   $('#post_content input[name="content"]').bind('click', function(evt) {

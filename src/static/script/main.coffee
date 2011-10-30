@@ -44,22 +44,24 @@ room_online_users = (content) ->
     $('#room_online_user .user_list').html(html)
 
 room_content = (content) ->
-    html = "<tr>
-            <td>#{content.user}</td>
-            <td>#{content.content}</td>
-            <td>#{content.created}</td>
-            </tr>
-        "
-    $('#chat_content table tbody').append(html)
-    $("#chat_content table tbody tr:last-child").get(0).scrollIntoView()
-    if not window.entering_content
-        if document.title.substr(0, 1) != '('
-            document.title = "(1) #{document.title}"
-        else
-            current_title = document.title
-            current_count = parseInt(current_title.slice(current_title.indexOf('(')+1, current_title.indexOf(')')))
-            new_count = current_count + 1
-            document.title = current_title.replace("(#{current_count})", "(#{new_count})")
+    $msg = $("#msg-#{content.id}")
+    if not $msg.length
+        html = "<tr id='msg-#{content.id}'>
+                <td>#{content.user}</td>
+                <td>#{content.content}</td>
+                <td>#{content.created}</td>
+                </tr>
+            "
+        $('#chat_content table tbody').append(html)
+        $("#chat_content table tbody tr:last-child").get(0).scrollIntoView()
+        if not window.entering_content
+            if document.title.substr(0, 1) != '('
+                document.title = "(1) #{document.title}"
+            else
+                current_title = document.title
+                current_count = parseInt(current_title.slice(current_title.indexOf('(')+1, current_title.indexOf(')')))
+                new_count = current_count + 1
+                document.title = current_title.replace("(#{current_count})", "(#{new_count})")
 
 $ ->
     if $('#chat_content tbody tr').length
@@ -68,6 +70,9 @@ $ ->
     $('#post_content').bind 'submit', (evt) ->
         evt.preventDefault()
         data = $(this).serialize()
+        if $.trim($(this).find('input[name="content"]').val()) == ''
+            return false
+
         $.post(
             $(this).attr('action')
             data
@@ -75,6 +80,7 @@ $ ->
                 $('#post_content input[name="content"]').val('')
                 window.entering_content = true
                 document.title = document.title.replace(/\([0-9]+\) /, '')
+                room_content result
             'json'
         )
 
