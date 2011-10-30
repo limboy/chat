@@ -67,6 +67,7 @@ def chat():
         room_info = json.loads(rc.get(room_info_key))
         rooms.append({
             'id': room_info['room_id'],
+            'creator': room_info['user'],
             'content': map(json.loads, reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_info['room_id']), 0, 4))),
             'title': room_info['title'],
             'users': rc.zrange(config.ROOM_ONLINE_USER_CHANNEL.format(room=room_info['room_id']), 0, -1),
@@ -77,6 +78,21 @@ def chat():
             uri = request.path,
             )
 
+@app.route('/rm_room', methods=['POST'])
+def rm_room():
+    if not session.get('user'):
+        return redirect('/')
+
+    room_id = request.form.get('room_id')
+    room_key = config.ROOM_INFO_KEY.format(room=room_id)
+    room_channel = config.ROOM_CHANNEL.format(room=room_id)
+    room = json.loads(rc.get(room_key))
+    if room['user'] != session.get('user'):
+        return jsonify(status='error', content={'message': 'permission denied'})
+
+    rc.delete(room_key)
+    rc.delete(room_channel)
+    return jsonify(status='ok', content={'url': '/chat'})
 
 @app.route('/chat/<int:room_id>')
 def chat_room(room_id):

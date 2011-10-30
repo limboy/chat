@@ -93,3 +93,19 @@ $ ->
 
     $('.add_room').bind 'click', (evt) ->
         $('.chat-bubble').toggle()
+
+    $('.header .close').bind 'click', (evt) ->
+        rs = confirm('do you really want to remove this room?')
+        if rs
+            room_info = $(this).parent().parent().attr('id').split('-')
+            room_id = room_info[room_info.length-1]
+            $.post(
+                '/rm_room'
+                {room_id: room_id}
+                (result) ->
+                    if result.status == 'ok'
+                        window.location = result.content.url
+                    else
+                        alert result.content.message
+                'json'
+            )

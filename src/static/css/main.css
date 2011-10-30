@@ -257,3 +257,10 @@ input[type="submit"] {
     position:relative;
     float:left;
 }
+
+.header .close {
+    float: right;
+    color: #ddd;
+    font-size: 14px;
+    cursor: pointer;
+}

@@ -108,7 +108,24 @@ $(function() {
   $('#post_content input[name="content"]').bind('blur', function(evt) {
     return window.entering_content = false;
   });
-  return $('.add_room').bind('click', function(evt) {
+  $('.add_room').bind('click', function(evt) {
     return $('.chat-bubble').toggle();
+  });
+  return $('.header .close').bind('click', function(evt) {
+    var room_id, room_info, rs;
+    rs = confirm('do you really want to remove this room?');
+    if (rs) {
+      room_info = $(this).parent().parent().attr('id').split('-');
+      room_id = room_info[room_info.length - 1];
+      return $.post('/rm_room', {
+        room_id: room_id
+      }, function(result) {
+        if (result.status === 'ok') {
+          return window.location = result.content.url;
+        } else {
+          return alert(result.content.message);
+        }
+      }, 'json');
+    }
   });
 });
