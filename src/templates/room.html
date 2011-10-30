@@ -27,10 +27,10 @@
 
 			<tbody>
 			{% for item in room_content %}
-			<tr>
-				<td>{{item['user']}}</td>
-				<td>{{item['content']}}</td>
-				<td>{{item['created']}}</td>
+            <tr id="msg-{{item.id}}">
+				<td>{{item.user|safe}}</td>
+				<td>{{item.content|safe}}</td>
+				<td>{{item.created}}</td>
 			</tr>
 			{% endfor %}
 			</tbody>

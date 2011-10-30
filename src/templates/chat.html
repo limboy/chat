@@ -7,7 +7,12 @@
 {% block main %}
 {% for room in rooms %}
 <div class="box" style="width:260px; float:left" id="room-{{room.id}}">
-    <div class="header"><a href="/chat/{{room.id}}">{{room.title}}</a><span>({{room.users|count}}人在线)</span></div>
+    <div class="header">
+        {% if session.user == room.creator %}
+            <p class="close"> x </p>
+        {% endif %}
+        <a href="/chat/{{room.id}}">{{room.title}}</a><span>({{room.users|count}}人在线)</span>
+    </div>
     <div class="body">
         <ul class="chat_line">
             {% for content in room.content %}
@@ -18,7 +23,18 @@
     </div>
 </div>
 {% endfor %}
-<div class="add_room"> + </div>
+
+    <div id="add_room_wrapper">
+        <div class="chat-bubble" style="display:none">
+            <form action="/chat" method="POST">
+                <input type="TEXT" name="title" style="width:187px" placeholder="聊天室名称,回车提交" />
+            </form>
+            <div class="chat-bubble-arrow-border"></div>
+            <div class="chat-bubble-arrow"></div>
+        </div>
+
+        <div class="add_room"> + </div>
+    </div>
 {% endblock %}
 
 {% block script %}

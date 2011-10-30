@@ -42,6 +42,9 @@ li.new {background: #ffe}
 }
 
 .add_room {
+    position: absolute;
+    left: 41px;
+    top: 3px;
     border: 1px solid #eee;
     background: #ffc;
     padding: 10px 15px;
@@ -54,7 +57,7 @@ li.new {background: #ffe}
     color: #666;
     font-size: 18px;
     float: left;
-    margin: 80px 30px;
+    margin: 80px 0px 80px 50px;
     cursor: pointer;
 }
 
@@ -215,4 +218,49 @@ input[type="submit"] {
     -moz-border-radius: 3px;
     -o-border-radius: 3px;
     margin:-4px 0 0 7px;
+}
+
+.chat-bubble {
+    background-color:#f8f8f8;
+    border:1px solid #eee;
+    line-height:1.3em;
+    margin:10px auto;
+    padding:10px;
+    position:relative;
+    text-align:center;
+    width:200px;
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+}
+.chat-bubble-arrow-border {
+    border-color: #eee transparent transparent transparent;
+    border-style: solid;
+    border-width: 10px;
+    height:0;
+    width:0;
+    position:absolute;
+    bottom:-21px;
+    left:100px;
+}
+.chat-bubble-arrow {
+    border-color: #f8f8f8 transparent transparent transparent;
+    border-style: solid;
+    border-width: 10px;
+    height:0;
+    width:0;
+    position:absolute;
+    bottom:-19px;
+    left:100px;
+}
+
+#add_room_wrapper {
+    position:relative;
+    float:left;
+}
+
+.header .close {
+    float: right;
+    color: #ddd;
+    font-size: 14px;
+    cursor: pointer;
 }

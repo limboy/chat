@@ -2,6 +2,7 @@
 
 from flask import Flask, request, session, render_template, Response, jsonify, redirect, flash
 from gevent.wsgi import WSGIServer
+from utils.text import linkify, escape_text
 import gevent
 import redis
 import time
@@ -24,6 +25,8 @@ def is_duplicate_name():
 
 @app.route('/')
 def index():
+    if session.get('user'):
+        return redirect('/chat')
     return render_template('index.html')
 
 @app.route('/change_name')
@@ -36,7 +39,7 @@ def login():
     user_name = request.form.get('user_name', '')
     if is_duplicate_name():
         return redirect('/')
-    session['user'] = user_name
+    session['user'] = escape_text(user_name)
     return redirect('/chat')
 
 @app.route('/chat', methods=['GET', 'POST'])
@@ -56,7 +59,7 @@ def chat():
                     'user': session['user'],
                     'created': time.time()
                     }))
-        return jsonify(status='ok', content={'url': '/chat'})
+        return redirect('/chat')
 
     rooms = []
     room_info_keys = config.ROOM_INFO_KEY.format(room='*')
@@ -64,6 +67,7 @@ def chat():
         room_info = json.loads(rc.get(room_info_key))
         rooms.append({
             'id': room_info['room_id'],
+            'creator': room_info['user'],
             'content': map(json.loads, reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_info['room_id']), 0, 4))),
             'title': room_info['title'],
             'users': rc.zrange(config.ROOM_ONLINE_USER_CHANNEL.format(room=room_info['room_id']), 0, -1),
@@ -74,6 +78,21 @@ def chat():
             uri = request.path,
             )
 
+@app.route('/rm_room', methods=['POST'])
+def rm_room():
+    if not session.get('user'):
+        return redirect('/')
+
+    room_id = request.form.get('room_id')
+    room_key = config.ROOM_INFO_KEY.format(room=room_id)
+    room_channel = config.ROOM_CHANNEL.format(room=room_id)
+    room = json.loads(rc.get(room_key))
+    if room['user'] != session.get('user'):
+        return jsonify(status='error', content={'message': 'permission denied'})
+
+    rc.delete(room_key)
+    rc.delete(room_channel)
+    return jsonify(status='ok', content={'url': '/chat'})
 
 @app.route('/chat/<int:room_id>')
 def chat_room(room_id):
@@ -110,9 +129,10 @@ def chat_room(room_id):
 def post_content():
     room_id = request.form.get('room_id')
     data = {'user': session.get('user'),
-            'content': request.form.get('content', ''),
+            'content': linkify(escape_text(request.form.get('content', ''))),
             'created': time.strftime('%m-%d %H:%M:%S'),
             'room_id': room_id,
+            'id': rc.incr(config.ROOM_CONTENT_INCR_KEY),
             }
     rc.zadd(config.ROOM_CHANNEL.format(room=room_id), json.dumps(data), time.time())
     rc.publish(config.ROOM_SIGNAL.format(room=room_id), json.dumps({
