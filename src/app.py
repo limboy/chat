@@ -130,6 +130,8 @@ def chat_room(room_id):
 
     room_online_users =[]
     for user in rc.zrange(room_online_user_channel, 0, -1):
+        if user == config.CHANNEL_PLACEHOLDER:
+            continue
         room_online_users.append(user.decode('utf-8'))
 
     return render_template('room.html',
