@@ -15,6 +15,11 @@ app.debug = True
 
 rc = redis.Redis()
 
+def is_admin():
+    if session.get('admin'):
+        return True
+    return False
+
 def is_duplicate_name():
     user_name = session.get('user', '')
     for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
@@ -23,6 +28,11 @@ def is_duplicate_name():
             session.pop('user', None)
             return True
     return False
+
+@app.route('/adm1n')
+def admin():
+    session['admin'] = 1
+    return redirect('/chat')
 
 @app.route('/')
 def index():
@@ -79,6 +89,7 @@ def chat():
     return render_template('chat.html',
             rooms = rooms,
             uri = request.path,
+            is_admin = is_admin(),
             )
 
 @app.route('/rm_room', methods=['POST'])
@@ -90,7 +101,7 @@ def rm_room():
     room_key = config.ROOM_INFO_KEY.format(room=room_id)
     room_channel = config.ROOM_CHANNEL.format(room=room_id)
     room = json.loads(rc.get(room_key))
-    if room['user'] != session.get('user'):
+    if not is_admin():
         return jsonify(status='error', content={'message': 'permission denied'})
 
     rc.delete(room_key)
