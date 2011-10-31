@@ -15,38 +15,24 @@ app.debug = True
 
 rc = redis.Redis()
 
+def is_admin():
+    if session.get('admin'):
+        return True
+    return False
+
 def is_duplicate_name():
     user_name = session.get('user', '')
     for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
-        if online_user == user_name:
+        if online_user == user_name.encode('utf-8'):
             flash(u'该名(%s)已被抢占，换一个吧'%user_name, 'error')
+            session.pop('user', None)
             return True
     return False
 
-class Comet(object):
-    def _single(self, config_key, channel):
-        if config_key not in rc.hgetall(channel):
-            rc.hset(channel, config_key, rc.get(config_key))
-        channel_val = rc.hget(channel, config_key)
-        key_val = rc.get(config_key)
-
-        if channel_val != key_val:
-            rc.hset(channel, config_key, key_val)
-            if key_val:
-                return json.loads(key_val)
-
-    def online_users(self, channel):
-        return self._single(config.ONLINE_USER_KEY, channel)
-
-    def room_online_users(self, channel, room_id = 0, key = None):
-        if not key:
-            key = config.ROOM_ONLINE_USER_KEY.format(room=room_id)
-        return self._single(key, channel)
-
-    def room_content(self, channel, room_id = 0, key = None):
-        if not key:
-            key = config.ROOM_KEY.format(room=room_id)
-        return self._single(key, channel)
+@app.route('/adm1n')
+def admin():
+    session['admin'] = 1
+    return redirect('/chat')
 
 @app.route('/')
 def index():
@@ -62,9 +48,9 @@ def change_name():
 @app.route('/login', methods=['POST'])
 def login():
     user_name = request.form.get('user_name', '')
+    session['user'] = user_name
     if is_duplicate_name():
         return redirect('/')
-    session['user'] = escape_text(user_name)
     return redirect('/chat')
 
 @app.route('/chat', methods=['GET', 'POST'])
@@ -90,17 +76,20 @@ def chat():
     room_info_keys = config.ROOM_INFO_KEY.format(room='*')
     for room_info_key in rc.keys(room_info_keys):
         room_info = json.loads(rc.get(room_info_key))
+        users = rc.zrevrange(config.ROOM_ONLINE_USER_CHANNEL.format(room=room_info['room_id']), 0, -1)
+        rm_channel_placeholder(users)
         rooms.append({
             'id': room_info['room_id'],
             'creator': room_info['user'],
             'content': map(json.loads, reversed(rc.zrevrange(config.ROOM_CHANNEL.format(room=room_info['room_id']), 0, 4))),
             'title': room_info['title'],
-            'users': rc.zrange(config.ROOM_ONLINE_USER_CHANNEL.format(room=room_info['room_id']), 0, -1),
+            'users': users,
             })
 
     return render_template('chat.html',
             rooms = rooms,
             uri = request.path,
+            is_admin = is_admin(),
             )
 
 @app.route('/rm_room', methods=['POST'])
@@ -112,7 +101,7 @@ def rm_room():
     room_key = config.ROOM_INFO_KEY.format(room=room_id)
     room_channel = config.ROOM_CHANNEL.format(room=room_id)
     room = json.loads(rc.get(room_key))
-    if room['user'] != session.get('user'):
+    if not is_admin():
         return jsonify(status='error', content={'message': 'permission denied'})
 
     rc.delete(room_key)
@@ -152,6 +141,9 @@ def chat_room(room_id):
 
 @app.route('/post_content', methods=['POST'])
 def post_content():
+    if not session.get('user'):
+        return redirect('/')
+
     room_id = request.form.get('room_id')
     data = {'user': session.get('user'),
             'content': linkify(escape_text(request.form.get('content', ''))),
@@ -160,11 +152,6 @@ def post_content():
             'id': rc.incr(config.ROOM_CONTENT_INCR_KEY),
             }
     rc.zadd(config.ROOM_CHANNEL.format(room=room_id), json.dumps(data), time.time())
-    rc.publish(config.ROOM_SIGNAL.format(room=room_id), json.dumps({
-        'type': 'add_content',
-        'data': data,
-        }))
-
     return jsonify(**data)
 
 @app.route('/comet')
@@ -172,56 +159,92 @@ def comet():
     uri = request.args.get('uri', '')
     room_id = request.args.get('room_id', '')
     comet = request.args.get('comet', '').split(',')
-    channel = config.CONN_CHANNEL_HASH.format(channel=request.args.get('channel'))
+    ts = request.args.get('ts', time.time())
+    channel = config.CONN_CHANNEL_SET.format(channel=request.args.get('channel'))
+
+    cmt = Comet()
+
+    result = cmt.check(channel, comet, ts, room_id)
+    if result:
+        return jsonify(**result)
+
+    passed_time = 0
+    while passed_time < config.COMET_TIMEOUT:
+        comet = rc.smembers(config.CONN_CHANNEL_SET.format(channel=channel))
+        result = cmt.check(channel, comet, ts, room_id)
+        if result:
+            return jsonify(**result)
+        passed_time += config.COMET_POLL_TIME
+        gevent.sleep(config.COMET_POLL_TIME)
 
     if room_id:
         room_online_user_channel = config.ROOM_ONLINE_USER_CHANNEL.format(room=room_id)
         rc.zadd(room_online_user_channel, session['user'], time.time())
     rc.zadd(config.ONLINE_USER_CHANNEL, session['user'], time.time())
 
-    cmt = Comet()
+    return jsonify(ts=time.time())
 
-    if 'online_users' in comet:
-        result = cmt.online_users(channel)
-        if result:
-            return jsonify(result)
+def rm_channel_placeholder(data):
+    for index, item in enumerate(data):
+        if item == config.CHANNEL_PLACEHOLDER:
+            data.pop(index)
 
-    if 'room_online_users' in comet:
-        result = cmt.room_online_users(channel, room_id)
-        if result:
-            return jsonify(result)
+class Comet(object):
+    def check(self, channel, comet, ts, room_id = 0):
+        conn_channel_set = config.CONN_CHANNEL_SET.format(channel=channel)
+        if 'online_users' in comet:
+            rc.sadd(conn_channel_set, 'online_users')
+            new_data = rc.zrangebyscore(config.ONLINE_USER_CHANNEL, ts, '+inf')
+            if new_data:
+                data=rc.zrevrange(config.ONLINE_USER_CHANNEL, 0, -1)
+                data.pop(0) if data[0] == config.CHANNEL_PLACEHOLDER else True
+                return dict(data=data,
+                        ts=time.time(), type='online_users')
 
-    if 'room_content' in comet:
-        result = cmt.room_content(channel, room_id)
-        if result:
-            return jsonify(result)
+        if 'room_online_users' in comet:
+            rc.sadd(conn_channel_set, 'room_online_users')
+            room_online_user_channel = config.ROOM_ONLINE_USER_CHANNEL.format(room=room_id)
+            new_data = rc.zrangebyscore(room_online_user_channel, ts, '+inf')
+            if new_data:
+                users=rc.zrevrange(room_online_user_channel, 0, -1)
+                rm_channel_placeholder(users)
+                data = {'room_id': room_id, 'users': users}
+                return dict(data=data,
+                    ts=time.time(), type='room_online_users')
 
-    if 'room_online_users_count_all' in comet:
-        room_online_user_keys = config.ROOM_ONLINE_USER_KEY.format(room='*')
-        for user_key in rc.keys(room_online_user_keys):
-            result = cmt.room_online_users(channel, key = user_key)
-            if result:
-                return jsonify(result)
+        if 'room_content' in comet:
+            rc.sadd(conn_channel_set, 'room_content')
+            room_channel = config.ROOM_CHANNEL.format(room=room_id)
+            new_data = rc.zrangebyscore(room_channel, ts, '+inf')
+            if new_data:
+                data = {'room_id': room_id, 'content':[]}
+                for item in new_data:
+                    data['content'].append(json.loads(item))
+                return dict(data=data, ts=time.time(), type='add_content')
 
-    if 'room_content_all' in comet:
-        room_keys = config.ROOM_KEY.format(room='*')
-        for room_key in rc.keys(room_keys):
-            result = cmt.room_content(channel, key = room_key)
-            if result:
-                return jsonify(result)
+        if 'room_online_users_count_all' in comet:
+            rc.sadd(conn_channel_set, 'room_online_users_count_all')
+            room_online_user_channels = config.ROOM_ONLINE_USER_CHANNEL.format(room='*')
+            for room_online_user_channel in rc.keys(room_online_user_channels):
+                new_data = rc.zrangebyscore(room_online_user_channel, ts, '+inf')
+                if new_data:
+                    users=rc.zrevrange(room_online_user_channel, 0, -1)
+                    rm_channel_placeholder(users)
+                    room_id = room_online_user_channel.split('_')[-1]
+                    data = {'room_id': room_id, 'users': users}
+                    return dict(data=data, ts=time.time(), type='room_online_users')
 
-    passed_time = 0
-    while passed_time < config.COMET_TIMEOUT:
-        for key, val in rc.hgetall(channel).items():
-            current_val = rc.get(key)
-            if current_val and val != current_val:
-                data = json.loads(current_val)
-                rc.hset(channel, key, current_val)
-                return jsonify(**data)
-        passed_time += config.COMET_POLL_TIME
-        gevent.sleep(config.COMET_POLL_TIME)
-
-    return jsonify([])
+        if 'room_content_all' in comet:
+            rc.sadd(conn_channel_set, 'room_content_all')
+            room_channels = config.ROOM_CHANNEL.format(room='*')
+            for room_channel in rc.keys(room_channels):
+                new_data = rc.zrangebyscore(room_channel, ts, '+inf')
+                if new_data:
+                    room_id = room_channel.split('_')[-1]
+                    data = {'room_id': room_id, 'content':[]}
+                    for item in new_data:
+                        data['content'].append(json.loads(item))
+                    return dict(data=data, ts=time.time(), type='add_content')
 
 def run():
     http_server = WSGIServer(('', config.PORT), app)

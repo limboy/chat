@@ -1,20 +1,26 @@
-var channel, create_chat_comet, create_room_comet, online_users, room_content, room_content_all, room_online_users, room_online_users_count_all;
+var channel, create_chat_comet, create_room_comet, room_content, room_content_all, room_online_users, room_online_users_count_all;
 channel = Math.floor(Math.random() * 1000000);
-create_chat_comet = function() {
+create_chat_comet = function(ts) {
   var arg;
-  arg = "comet=room_online_users_count_all,room_content_all&channel=" + channel;
+  if (ts == null) {
+    ts = '';
+  }
+  arg = "comet=room_online_users_count_all,room_content_all&channel=" + channel + "&ts=" + ts;
   return $.getJSON("/comet?uri=" + window.uri + "&" + arg, function(result) {
     if (result.type === 'room_online_users') {
       room_online_users_count_all(result.data);
     } else if (result.type === 'add_content') {
       room_content_all(result.data);
     }
-    return create_chat_comet();
+    return create_chat_comet(result.ts);
   });
 };
-create_room_comet = function() {
+create_room_comet = function(ts) {
   var arg;
-  arg = "comet=online_users,room_online_users,room_content&channel=" + channel + "&room_id=" + window.room_id;
+  if (ts == null) {
+    ts = '';
+  }
+  arg = "comet=room_online_users,room_content&channel=" + channel + "&room_id=" + window.room_id + "&ts=" + ts;
   return $.getJSON("/comet?uri=" + window.uri + "&" + arg, function(result) {
     if (result.type === 'online_users') {
       online_users(result.data);
@@ -23,65 +29,47 @@ create_room_comet = function() {
     } else if (result.type === 'add_content') {
       room_content(result.data);
     }
-    return create_room_comet();
+    return create_room_comet(result.ts);
   });
 };
-room_online_users_count_all = function(content) {
-  var room_id, users, _results;
+room_online_users_count_all = function(data) {
+  return $("#room-" + data.room_id + " .header span").text("(" + data.users.length + "人在线)");
+};
+room_content_all = function(data) {
+  var $body, content, _i, _len, _ref, _results;
+  $body = $("#room-" + data.room_id + " .body");
+  _ref = data.content;
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    content = _ref[_i];
+    $body.find('ul').append("<li class='new' title='" + content.user + " " + content.created + "'>" + content.content + "</li>");
+  }
   _results = [];
-  for (room_id in content) {
-    users = content[room_id];
-    _results.push($("#room-" + room_id + " .header span").text("(" + users.length + "人在线)"));
+  while ($body.find('ul li').length > 5) {
+    _results.push($body.find('ul li:first-child').remove());
   }
   return _results;
 };
-room_content_all = function(content) {
-  var $body;
-  $body = $("#room-" + content.room_id + " .body");
-  $body.find('ul').append("<li class='new' title='" + content.user + " " + content.created + "'>" + content.content + "</li>");
-  if ($body.find('ul li').length > 5) {
-    return $body.find('ul li:first-child').remove();
-  }
-};
-online_users = function(content) {
-  var html, val, _i, _len;
+room_online_users = function(data) {
+  var html, item, _i, _len, _ref;
   html = '';
-  for (_i = 0, _len = content.length; _i < _len; _i++) {
-    val = content[_i];
-    html += "<span>" + val + "</span>";
-  }
-  return $('#global_online_user .user_list').html(html);
-};
-room_online_users = function(content) {
-  var html, item, room_id, val, _i, _len;
-  html = '';
-  for (room_id in content) {
-    val = content[room_id];
-    for (_i = 0, _len = val.length; _i < _len; _i++) {
-      item = val[_i];
-      html += "<span>" + item + "</span>";
-    }
+  _ref = data.users;
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    item = _ref[_i];
+    html += "<span>" + item + "</span>";
   }
   return $('#room_online_user .user_list').html(html);
 };
-room_content = function(content) {
-  var $msg, current_count, current_title, html, new_count;
-  $msg = $("#msg-" + content.id);
-  if (!$msg.length) {
-    html = "<tr id='msg-" + content.id + "'>                <td>" + content.user + "</td>                <td>" + content.content + "</td>                <td>" + content.created + "</td>                </tr>            ";
-    $('#chat_content table tbody').append(html);
-    $("#chat_content table tbody tr:last-child").get(0).scrollIntoView();
-    if (!window.entering_content) {
-      if (document.title.substr(0, 1) !== '(') {
-        return document.title = "(1) " + document.title;
-      } else {
-        current_title = document.title;
-        current_count = parseInt(current_title.slice(current_title.indexOf('(') + 1, current_title.indexOf(')')));
-        new_count = current_count + 1;
-        return document.title = current_title.replace("(" + current_count + ")", "(" + new_count + ")");
-      }
-    }
+room_content = function(data) {
+  var $msg, content, current_count, current_title, html, new_count, _i, _len, _ref, _results;
+  console.log(data);
+  _ref = data.content;
+  _results = [];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    content = _ref[_i];
+    $msg = $("#msg-" + content.id);
+    _results.push(!$msg.length ? (html = "<tr id='msg-" + content.id + "'>                    <td>" + content.user + "</td>                    <td>" + content.content + "</td>                    <td>" + content.created + "</td>                    </tr>                ", $('#chat_content table tbody').append(html), $("#chat_content table tbody tr:last-child").get(0).scrollIntoView(), !window.entering_content ? document.title.substr(0, 1) !== '(' ? document.title = "(1) " + document.title : (current_title = document.title, current_count = parseInt(current_title.slice(current_title.indexOf('(') + 1, current_title.indexOf(')'))), new_count = current_count + 1, document.title = current_title.replace("(" + current_count + ")", "(" + new_count + ")")) : void 0) : void 0);
   }
+  return _results;
 };
 $(function() {
   if ($('#chat_content tbody tr').length) {
@@ -98,7 +86,9 @@ $(function() {
       $('#post_content input[name="content"]').val('');
       window.entering_content = true;
       document.title = document.title.replace(/\([0-9]+\) /, '');
-      return room_content(result);
+      return room_content({
+        'content': [result]
+      });
     }, 'json');
   });
   $('#post_content input[name="content"]').bind('click', function(evt) {

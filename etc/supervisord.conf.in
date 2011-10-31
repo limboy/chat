@@ -30,21 +30,6 @@ command=${buildout:directory}/bin/python ${buildout:directory}/src/app.py
 stderr_logfile = ${buildout:directory}/log/supervisor/web-stderr.log
 stdout_logfile = ${buildout:directory}/log/supervisor/web-stdout.log
 
-[program:online_user]
-command=${buildout:directory}/bin/python ${buildout:directory}/src/subscribers/online_user.py
-stderr_logfile = ${buildout:directory}/log/supervisor/online_user-stderr.log
-stdout_logfile = ${buildout:directory}/log/supervisor/online_user-stdout.log
-
-[program:room_online_user]
-command=${buildout:directory}/bin/python ${buildout:directory}/src/subscribers/room_online_user.py
-stderr_logfile = ${buildout:directory}/log/supervisor/room_online_user-stderr.log
-stdout_logfile = ${buildout:directory}/log/supervisor/room_online_user-stdout.log
-
-[program:room]
-command=${buildout:directory}/bin/python ${buildout:directory}/src/subscribers/room.py
-stderr_logfile = ${buildout:directory}/log/supervisor/room-stderr.log
-stdout_logfile = ${buildout:directory}/log/supervisor/room-stdout.log
-
 [program:gc]
 command=${buildout:directory}/bin/python ${buildout:directory}/src/gc.py
 stderr_logfile = ${buildout:directory}/log/supervisor/gc-stderr.log

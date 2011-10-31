@@ -8,7 +8,7 @@
 {% for room in rooms %}
 <div class="box" style="width:260px; float:left" id="room-{{room.id}}">
     <div class="header">
-        {% if session.user == room.creator %}
+        {% if is_admin %}
             <p class="close"> x </p>
         {% endif %}
         <a href="/chat/{{room.id}}">{{room.title}}</a><span>({{room.users|count}}人在线)</span>
