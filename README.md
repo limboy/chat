@@ -30,6 +30,13 @@ Tips
 Changes
 =======
 
+0.2
+---
+
+* adjust comet strategy
+* add admin role
+* fix duplicate name
+
 0.1.1
 -----
 
