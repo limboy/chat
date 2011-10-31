@@ -15,27 +15,12 @@ app.debug = True
 
 rc = redis.Redis()
 
-def auto_login():
-    if not session.get('user'):
-        return False
-
-    user_name = session.get('user')
-    online_users = rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1)
-    if user_name.encode('utf-8') in online_users:
-        session.pop('user', None)
-        if type(user_name) == unicode:
-            user_name = user_name.encode('utf-8')
-        flash(u'此名很火(%s)，已被抢占，换一个吧'%user_name.decode('utf-8'), 'error')
-        return False
-
-    rc.zadd(config.ONLINE_USER_CHANNEL, user_name, time.time())
-    return True
-
 def is_duplicate_name():
     user_name = session.get('user', '')
     for online_user in rc.zrange(config.ONLINE_USER_CHANNEL, 0, -1):
-        if online_user == user_name:
+        if online_user == user_name.encode('utf-8'):
             flash(u'该名(%s)已被抢占，换一个吧'%user_name, 'error')
+            session.pop('user', None)
             return True
     return False
 
@@ -53,15 +38,14 @@ def change_name():
 @app.route('/login', methods=['POST'])
 def login():
     user_name = request.form.get('user_name', '')
+    session['user'] = user_name
     if is_duplicate_name():
         return redirect('/')
-    session['user'] = user_name
-    session.permanent = True
     return redirect('/chat')
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
-    if not auto_login():
+    if not session.get('user'):
         return redirect('/')
 
     if request.method == 'POST':
@@ -115,7 +99,7 @@ def rm_room():
 
 @app.route('/chat/<int:room_id>')
 def chat_room(room_id):
-    if not auto_login():
+    if not session.get('user'):
         return redirect('/')
 
     user_name = session['user']
@@ -146,7 +130,7 @@ def chat_room(room_id):
 
 @app.route('/post_content', methods=['POST'])
 def post_content():
-    if not auto_login():
+    if not session.get('user'):
         return redirect('/')
 
     room_id = request.form.get('room_id')

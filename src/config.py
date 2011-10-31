@@ -3,6 +3,7 @@
 DEBUG = True
 PORT = 9527
 SECRET_KEY = 'i have a dream'
+SESSION_COOKIE_HTTPONLY = False
 
 CHAT_NAME = u'谈天说地老天荒'
 
