@@ -29,7 +29,7 @@ def is_duplicate_name():
             return True
     return False
 
-@app.route('/adm1n')
+@app.route('/admin')
 def admin():
     session['admin'] = 1
     return redirect('/chat')
