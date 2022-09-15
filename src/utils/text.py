@@ -91,7 +91,7 @@ def linkify(txt,
         host_part = parts[0]
 
         if host_part.startswith('www.'):
-            host_part = '.'.join(host_part.split('.')[1:]) # add extra idnetification for external link
+            host_part = '.'.join(host_part.split('.')[1:]) # add extra identification for external link
         if not local_domain or not host_part.endswith(local_domain):
             params  += ' class="external" '
             tb = True
